@@ -88,8 +88,11 @@ module Ans
 
       def reset_data
         @data = {}
-        @model.all.each do |row|
-          read_from_database row
+        begin
+          @model.all.each do |row|
+            read_from_database row
+          end
+        rescue ActiveRecord::StatementInvalid
         end
 
         @schema.columns.each do |column|
