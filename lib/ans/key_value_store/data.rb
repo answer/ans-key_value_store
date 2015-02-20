@@ -9,30 +9,40 @@ module Ans
         @model = model
         @key_column = key_column
         @value_column = value_column
-
-        reset_data
-        clear_changes_information
       end
 
       def attribute_read(key)
         receive_access(key)
-        @data[key.to_sym]
+        initialize_data[key.to_sym]
       end
       def attribute_write(key,value)
         return unless respond_to?(key.to_sym)
 
+        data = initialize_data
         value = cast key, value
-        attribute_will_change! key if value != @data[key.to_sym]
-        @data[key.to_sym] = value
+        if value != data[key.to_sym]
+          attribute_will_change! key
+        end
+
+        data[key.to_sym] = value
       end
 
       def reload
-        reset_data
-
-        if changed?
-          eval_observing_blocks
-          changes_applied
+        @data = {}
+        begin
+          @model.all.each do |row|
+            read_from_database row
+          end
+        rescue ActiveRecord::StatementInvalid
         end
+
+        @schema.columns.each do |column|
+          if !column.default.nil? && @data[column.name.to_sym].nil?
+            read_from_database write_to_database column.name, column.default
+          end
+        end
+
+        clear_changes_information
 
         self
       end
@@ -86,20 +96,9 @@ module Ans
 
       private
 
-      def reset_data
-        @data = {}
-        begin
-          @model.all.each do |row|
-            read_from_database row
-          end
-        rescue ActiveRecord::StatementInvalid
-        end
-
-        @schema.columns.each do |column|
-          if !column.default.nil? && @data[column.name.to_sym].nil?
-            read_from_database write_to_database column.name, column.default
-          end
-        end
+      def initialize_data
+        reload unless @data
+        @data
       end
       def read_from_database(row)
         attribute_write row.__send__(@key_column), row.__send__(@value_column)
