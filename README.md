@@ -5,7 +5,7 @@
 ```ruby
 create_table :settings do |t|
   t.string :key
-  t.string :value
+  t.text   :value
 end
 
 =begin
@@ -103,14 +103,14 @@ end
 
 ### データが読み込まれるタイミング
 
-`key_value_store` メソッドがコールされた時点で、すべてのデータが読み込まれる
+設定値を取得、更新しようとしたタイミングで、すべてのデータが読み込まれる
 
-`all` スコープが使用され、この時点で一回クエリが発行される
+`all` スコープが使用され、一回クエリが発行される
 
 
 ### データが保存されるタイミング
 
-#### default が指定された場合
+#### 値を取得、更新した時点(default が指定されているキー)
 
 データが読み込まれたタイミングで、 default が指定されているキーについて書き込みを行う
 
@@ -123,6 +123,27 @@ nil 値を持つ default が指定されているキーに対して二回づつ�
 update, update!, save, save! がコールされた時点ですべてのキーを検索して値を更新  
 すべてのキーに対して一回づつ検索クエリが発行される  
 変更があったキーに対して一回づつ更新クエリが発行される
+
+
+## キャスト
+
+キャストは ActiveRecord::Type::#{型クラス} を用いて行われる
+
+* string   : String
+* integer  : Integer
+* decimal  : Decimal
+* datetime : DateTime
+* date     : Date
+* time     : Time
+
+datetime と time は、 ActiveRecord::Base.default_timezone によって、 utc か local かが決まる
+
+データベースには、キャストされた値を `to_s` したものを保存する
+
+String 以外の型に空文字列を設定すると値は nil に変換される  
+データベース上も null で保存される
+
+String の場合は空の文字列で設定すると空の文字列で保存される
 
 
 ## Setting and defaults
@@ -165,6 +186,11 @@ end
 * 最初にすべての設定を読み、キャッシュ
 * 更新は頻繁には行われない
 * デフォルト値は最初に DB に記録
+
+## テスト
+
+* mysql データベースに接続: config/database.yml
+* ./bin/run_test.sh でテストの実行
 
 ## Contributing
 

@@ -1,5 +1,7 @@
 require "ans/key_value_store/version"
 
+require "active_support/configurable"
+
 module Ans
   module KeyValueStore
     include ActiveSupport::Configurable

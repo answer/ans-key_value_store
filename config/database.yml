@@ -1,0 +1,11 @@
+test:
+  adapter: mysql2
+  reconnect: false
+  pool: 5
+  socket: /var/run/mysqld/mysqld.sock
+  encoding: utf8
+  charset: utf8
+  collation: utf8_general_ci
+  database: ans-key_value_store
+  username: test
+  password: test
