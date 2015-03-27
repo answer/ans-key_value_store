@@ -44,7 +44,7 @@ end
 <% end %>
 ```
 ```ruby
-Setting.data.update params.require(:data).permit(:copy_right)
+Setting.data.update params.require(:setting_data).permit(:copy_right)
 
 # バリデーションエラー
 Setting.data.update! copy_right: nil # => raise ActiveRecord::RecordInvalid
