@@ -38,16 +38,25 @@ Setting.eval_if_changed do
 end
 ```
 ```erb
+<%# フォームの組み立てができる %>
 <%= form_for Setting.data do |f| %>
   <%= f.label :copy_right %>
   <%= f.text_field :copy_right %>
 <% end %>
 ```
 ```ruby
+# コントローラーでアップデートができる
 Setting.data.update params.require(:setting_data).permit(:copy_right)
 
-# バリデーションエラー
+# バリデーションの定義も可能
 Setting.data.update! copy_right: nil # => raise ActiveRecord::RecordInvalid
+
+# クラスメソッドで参照しているデータは保存が完了したもの
+Setting.copy_right #=> "answer"
+Setting.data.copy_right = "copy_right"
+Setting.copy_right #=> "answer"
+Setting.data.save
+Setting.copy_right #=> "copy_right"
 ```
 
 ## Installation
@@ -155,7 +164,6 @@ class Setting < ActiveRecord::Base
     config.default_store_name,
     key: config.default_key_column,
     value: config.default_value_column,
-    delegate: true,
   ) do
     ...
   end
@@ -165,7 +173,6 @@ end
 * 第一引数 : データストア用のクラスインスタンスにアクセスするためのクラスメソッド名
 * key : キーカラム名
 * column : 値カラム名
-* delegate : 各カラムをクラスメソッドとして定義するか
 
 ```ruby
 # config/initializers/ans-key_value_store.rb

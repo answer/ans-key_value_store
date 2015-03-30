@@ -15,12 +15,17 @@ module Ans
     end
 
     describe "validation" do
+      before do
+        Setting.create(key: "copy_right", value: "answer")
+        Setting.data.reload
+      end
       it "バリデーションチェックが行われる" do
         Setting.data.copy_right = ""
-        assert{!Setting.data.save}
+        assert{Setting.data.save === false}
         assert{Setting.data.invalid?}
+        assert{Setting.copy_right == "answer"}
         Setting.data.reload
-        assert{Setting.copy_right.nil?}
+        assert{Setting.copy_right == "answer"}
       end
     end
   end
