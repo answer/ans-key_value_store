@@ -24,6 +24,13 @@ module Ans
     end
 
     describe "インスタンスメソッド" do
+      it "persisted?" do
+        assert{Setting.data.persisted? == true}
+      end
+      it "new_record?" do
+        assert{Setting.data.new_record? == false}
+      end
+
       it "copy_right" do
         assert{Setting.data.respond_to?(:copy_right)}
       end
