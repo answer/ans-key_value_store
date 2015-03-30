@@ -11,6 +11,13 @@ module Ans
         @value_column = value_column
       end
 
+      def new_record?
+        false
+      end
+      def persisted?
+        true
+      end
+
       def attribute_read(key)
         receive_access(key)
         initialize_data[key.to_sym]
