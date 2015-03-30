@@ -38,7 +38,7 @@ Setting.eval_if_changed do
 end
 ```
 ```erb
-<%# フォームの組み立てができる %>
+<%# フォームの組み立て: update アクションへのルーティング %>
 <%= form_for Setting.data do |f| %>
   <%= f.label :copy_right %>
   <%= f.text_field :copy_right %>
