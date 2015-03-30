@@ -18,7 +18,7 @@ module Ans
       config = KeyValueStore.config
 
       (class << m; self; end).class_eval do
-        define_method :key_value_store do |store_name=nil, key: nil, value: nil, delegate: true, &block|
+        define_method :key_value_store do |store_name=nil, key: nil, value: nil, &block|
           store_name ||= config.default_store_name
 
           schema = connection.__send__ :create_table_definition, :data, false, nil
@@ -61,9 +61,12 @@ module Ans
               data
             end
 
-            if delegate
-              delegate(*schema.columns.map{|column| column.name}, to: store_name)
-              delegate(:eval_if_changed, to: store_name)
+            delegate(:eval_if_changed, to: store_name)
+
+            schema.columns.each do |column|
+              define_method column.name do
+                data.attribute_read_stored column.name
+              end
             end
           end
         end

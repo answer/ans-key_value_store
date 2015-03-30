@@ -15,6 +15,10 @@ module Ans
         receive_access(key)
         initialize_data[key.to_sym]
       end
+      def attribute_read_stored(key)
+        receive_access(key)
+        initialize_stored_data[key.to_sym]
+      end
       def attribute_write(key,value)
         return unless respond_to?(key.to_sym)
 
@@ -43,6 +47,7 @@ module Ans
         end
 
         clear_changes_information
+        @stored_data = @data.dup
 
         self
       end
@@ -76,6 +81,7 @@ module Ans
 
           eval_observing_blocks
           changes_applied
+          @stored_data = @data.dup
         end
 
         nil
@@ -99,6 +105,10 @@ module Ans
       def initialize_data
         reload unless @data
         @data
+      end
+      def initialize_stored_data
+        reload unless @stored_data
+        @stored_data
       end
       def read_from_database(row)
         attribute_write row.__send__(@key_column), row.__send__(@value_column)
