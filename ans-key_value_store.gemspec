@@ -26,7 +26,7 @@ Gem::Specification.new do |spec|
   spec.add_development_dependency "database_cleaner", "~> 1.4"
 
   spec.add_development_dependency "minitest", "~> 5.0"
-  spec.add_development_dependency "minitest-power_assert"
+  spec.add_development_dependency "minitest-power_assert", "~> 0.0.3"
 
   spec.add_development_dependency "pry", "~> 0.10"
 end
