@@ -58,9 +58,6 @@ Setting.data.copy_right = "copy_right"
 Setting.copy_right #=> "answer"
 Setting.data.save
 Setting.copy_right #=> "copy_right"
-
-# コメントの参照
-Setting.data.consumption_tax_rate_comment # => "消費税率"
 ```
 
 ## Installation
@@ -88,7 +85,7 @@ class Setting < ActiveRecord::Base
     schema do |t|
       t.string   :copy_right
       t.integer  :retry_limit,          default: 3
-      t.decimal  :consumption_tax_rate, comment: "消費税率"
+      t.decimal  :consumption_tax_rate
       t.datetime :start_at
       t.date     :start_on
       t.time     :start
@@ -111,7 +108,7 @@ end
 サブクラスには schema クラスメソッドが定義されており、これを使用してキーと型の定義を行う  
 マイグレーションで使用可能なメソッドは使えるが、上記以外のテストはしていない
 
-オプションは default と comment のみ使用可能
+オプションは default のみ使用可能
 
 
 ### データが読み込まれるタイミング
