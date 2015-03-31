@@ -8,15 +8,18 @@ module Ans
       key_value_store do
         schema do |t|
           t.string :copy_right
+          t.string :domain
         end
 
         validates :copy_right, presence: true
+        validates :domain, presence: true
       end
     end
 
     describe "validation" do
       before do
         Setting.create(key: "copy_right", value: "answer")
+        Setting.create(key: "domain", value: "") # 変更がなければバリデーションエラーを報告しない
         Setting.data.reload
       end
       it "バリデーションチェックが行われる" do

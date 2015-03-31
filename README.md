@@ -49,6 +49,7 @@ end
 Setting.data.update params.require(:setting_data).permit(:copy_right)
 
 # バリデーションの定義も可能
+# ただし、データ保存時には変更されていないカラムのバリデーションエラーはそのまま放っておいて更新は行われる
 Setting.data.update! copy_right: nil # => raise ActiveRecord::RecordInvalid
 
 # クラスメソッドで参照しているデータは保存が完了したもの
@@ -156,6 +157,16 @@ String 以外の型に空文字列を設定すると値は nil に変換され�
 データベース上も null で保存される
 
 String の場合は空の文字列で設定すると空の文字列で保存される
+
+
+## バリデーション
+
+key_value_store ブロックの中で validates が定義可能
+
+データ保存時にバリデーションエラーが検出された場合は更新がキャンセルされる
+
+ただし、変更のないカラムにバリデーションエラーがあった場合、変更点の保存は行われる  
+これは、想定している key-value のデータがそれぞれ独立していることを想定しているため、他の key のバリデーションエラーにつられてすべてのデータが更新不可能になるのが不便であったためである
 
 
 ## Setting and defaults
