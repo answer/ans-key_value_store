@@ -37,9 +37,6 @@ module Ans
 
         data[key.to_sym] = value
       end
-      def attribute_comment(key)
-        @schema.instance_variable_get(:@ans_key_value_store_comments)[key.to_sym]
-      end
 
       def reload
         @data = {}

@@ -23,15 +23,6 @@ module Ans
 
           schema = connection.__send__ :create_table_definition, :data, false, nil
 
-          schema.class_eval do
-            define_method :column_with_comment do |name,type,options={}|
-              @ans_key_value_store_comments ||= {}
-              @ans_key_value_store_comments[name] = options[:comment]
-              column_without_comment name, type, options
-            end
-            alias_method_chain :column, :comment
-          end
-
           data_class = const_set store_name.to_s.camelize, Class.new(Data)
           (class << data_class; self; end).class_eval do
             define_method :schema do |&td_block|
@@ -47,9 +38,6 @@ module Ans
                     end
                     define_method "#{column.name}=" do |value|
                       attribute_write column.name, value
-                    end
-                    define_method "#{column.name}_comment" do
-                      attribute_comment column.name
                     end
                   end
                 end
