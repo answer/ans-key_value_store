@@ -80,9 +80,15 @@ module Ans
           attribute_write key, value
         end
 
-        raise ActiveRecord::RecordInvalid, self if invalid?
-
         if changed?
+          if invalid?
+            changes.each do |key,(old,new)|
+              if errors.key? key.to_sym
+                raise ActiveRecord::RecordInvalid, self
+              end
+            end
+          end
+
           @model.transaction do
             changes.each do |key,(old,new)|
               write_to_database key, new
