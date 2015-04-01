@@ -37,6 +37,9 @@ module Ans
 
         data[key.to_sym] = value
       end
+      def attribute_record(key)
+        @model.find_or_initialize_by(@key_column => key)
+      end
 
       def reload
         @data = {}
@@ -48,7 +51,7 @@ module Ans
         end
 
         @schema.columns.each do |column|
-          if !column.default.nil? && @data[column.name.to_sym].nil?
+          unless @data.key? column.name.to_sym
             read_from_database write_to_database column.name, column.default
           end
         end
@@ -127,7 +130,7 @@ module Ans
         attribute_write row.__send__(@key_column), row.__send__(@value_column)
       end
       def write_to_database(key,value)
-        row = @model.find_or_initialize_by(@key_column => key)
+        row = attribute_record(key)
         value = value.to_s unless value.nil?
         row.__send__ "#{@value_column}=", value
         row.save! if row.changed?

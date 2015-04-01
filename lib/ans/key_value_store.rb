@@ -39,6 +39,9 @@ module Ans
                     define_method "#{column.name}=" do |value|
                       attribute_write column.name, value
                     end
+                    define_method "#{column.name}_record" do
+                      attribute_record column.name
+                    end
                   end
                 end
               end
