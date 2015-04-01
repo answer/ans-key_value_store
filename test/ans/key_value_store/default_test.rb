@@ -24,26 +24,26 @@ module Ans
         Setting.data.reload
       end
       it "copy_right" do
-        assert{Setting.find_by(key: "copy_right").try(:value) == "answer"}
+        assert{Setting.find_by(key: "copy_right").value == "answer"}
       end
       it "retry_limit" do
-        assert{Setting.find_by(key: "retry_limit").try(:value) == "3"}
+        assert{Setting.find_by(key: "retry_limit").value == "3"}
       end
       it "consumption_tax_rate" do
-        assert{Setting.find_by(key: "consumption_tax_rate").try(:value) == "0.8"}
+        assert{Setting.find_by(key: "consumption_tax_rate").value == "0.8"}
       end
       it "start_at" do
-        assert{Setting.find_by(key: "start_at").try(:value) == "2015-01-01 10:00:00"}
+        assert{Setting.find_by(key: "start_at").value == "2015-01-01 10:00:00"}
       end
       it "start_on" do
-        assert{Setting.find_by(key: "start_on").try(:value) == "2015-01-01"}
+        assert{Setting.find_by(key: "start_on").value == "2015-01-01"}
       end
       it "start" do
-        assert{Setting.find_by(key: "start").try(:value) == "10:00:00"}
+        assert{Setting.find_by(key: "start").value == "10:00:00"}
       end
 
       it "no_default_value" do
-        assert{Setting.find_by(key: "no_default_value").nil?}
+        assert{Setting.find_by(key: "no_default_value").value.nil?}
       end
     end
   end

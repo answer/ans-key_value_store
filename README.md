@@ -58,6 +58,9 @@ Setting.data.copy_right = "copy_right"
 Setting.copy_right #=> "answer"
 Setting.data.save
 Setting.copy_right #=> "copy_right"
+
+# キーで find_by したものを取得
+Setting.data.copy_right_record #=> Setting.find_or_initialize_by(key: "copy_right")
 ```
 
 ## Installation
@@ -120,19 +123,16 @@ end
 
 ### データが保存されるタイミング
 
-#### 値を取得、更新した時点(default が指定されているキー)
+#### 値を取得した時点
 
-データが読み込まれたタイミングで、 default が指定されているキーについて書き込みを行う
+データが読み込まれたタイミングで、 schema で指定したキーがデータベースに存在しない場合、書き込みを行う
 
-該当するキーが nil の値を持っている場合に、キーを検索して値を更新  
-nil 値を持つ default が指定されているキーに対して二回づつクエリが発行される
+書き込み時には default で指定した値を使用する
 
+#### 保存された時点
 
-#### 保存された場合
-
-update, update!, save, save! がコールされた時点ですべてのキーを検索して値を更新  
-すべてのキーに対して一回づつ検索クエリが発行される  
-変更があったキーに対して一回づつ更新クエリが発行される
+update, update!, save, save! がコールされた時点で変更されたキーを検索して値を更新  
+各変更済みキーに対して、検索して更新、の二回づつ検索クエリが発行される
 
 
 ## キャスト
