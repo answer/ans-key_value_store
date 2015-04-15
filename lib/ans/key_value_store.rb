@@ -25,13 +25,18 @@ module Ans
           store_name ||= config.default_store_name
 
           validate_hash = {}
-          current_category = nil
           category_hash = {}
+          category_key_hash = {}
+          category_info = {}
+          current_category = nil
 
           schema = connection.__send__ :create_table_definition, :data, false, nil
           schema.class_eval do
             define_method :column_with_key_value_store do |column,type,options|
               category_hash[column.to_sym] = current_category
+              category_key_hash[current_category] ||= []
+              category_key_hash[current_category] << column.to_sym
+
               if validate_info = options.delete(:validates)
                 validate_hash[column] = validate_info
               end
@@ -43,7 +48,11 @@ module Ans
           data_class = const_set store_name.to_s.camelize, Class.new(Data)
           (class << data_class; self; end).class_eval do
             define_method :category do |category_name,label:nil,&block|
-              current_category = [category_name.to_sym,label: label || category_name.to_s.humanize]
+              current_category = category_name.to_sym
+              category_info[category_name.to_sym] = {
+                name: category_name.to_sym,
+                label: label || category_name.to_s.humanize,
+              }
               block.call
               current_category = nil
             end
@@ -91,18 +100,31 @@ module Ans
 
           self.class_eval do
             scope config.category_scope_name, ->(name){
-              where(key_column => category_hash.select{|key,(category,opts)| category == name.to_sym}.keys)
+              if name
+                raise KeyError, "category not defined [#{name}]" unless category_info.has_key?(name.to_sym)
+              end
+              where(key_column => category_key_hash[name.try(:to_sym)])
             }
             define_method config.category_method_name do
-              category_hash[self.send(key_column).to_sym].first
+              key = self.send(key_column).try(:to_sym)
+              raise KeyError, "key not defined [#{key}]" unless category_hash.has_key?(key)
+              category_hash[key]
             end
             define_method config.category_label_method_name do
-              category_hash[self.send(key_column).to_sym].last[:label]
+              key = self.send(key_column).try(:to_sym)
+              raise KeyError, "key not defined [#{key}]" unless category_hash.has_key?(key)
+              category_info[category_hash[key]].try(:fetch,:label).to_s
             end
           end
           (class << self; self; end).class_eval do
             define_method store_name do
               data
+            end
+            define_method config.category_label_method_name do |name|
+              if name
+                raise KeyError, "category not found [#{name}]" unless category_info.has_key?(name.to_sym)
+              end
+              category_info[name.try(:to_sym)].try(:fetch,:label).to_s
             end
 
             delegate(:eval_if_changed, to: store_name)

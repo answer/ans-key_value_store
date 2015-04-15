@@ -38,6 +38,9 @@ Setting.category(:core)
 Setting.category(:general)
 # => [<Setting key: start_at>, <Setting key: start_on>, <Setting key: start>]
 
+Setting.category_name(:core) # => Core
+Setting.category_name(:general) # => 一般
+
 Setting.find_by(key: "copy_right").category #=> core
 Setting.find_by(key: "copy_right").category_label #=> Core
 
