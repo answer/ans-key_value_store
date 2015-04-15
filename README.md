@@ -32,21 +32,6 @@ Setting.start_at             # => 2015-01-01 10:00:00 <Time>
 Setting.start_on             # => 2015-01-01          <Date>
 Setting.start                # => {now} 10:00:00      <Time>
 
-Setting.category(:core)
-# => [<Setting key: copy_right>, <Setting key: retry_limit>, <Setting key: consumption_tax_rate>]
-
-Setting.category(:general)
-# => [<Setting key: start_at>, <Setting key: start_on>, <Setting key: start>]
-
-Setting.category_name(:core) # => Core
-Setting.category_name(:general) # => 一般
-
-Setting.find_by(key: "copy_right").category #=> core
-Setting.find_by(key: "copy_right").category_label #=> Core
-
-Setting.find_by(key: "start_at").category #=> general
-Setting.find_by(key: "start_at").category_label #=> 一般
-
 Setting.eval_if_changed do
   # 変更があった場合に再評価される
   config.copy_right = Setting.copy_right
@@ -76,6 +61,27 @@ Setting.copy_right #=> "copy_right"
 
 # キーで find_by したものを取得
 Setting.data.copy_right_record #=> Setting.find_by(key: "copy_right")
+```
+```ruby
+# カテゴリ
+Setting.categories # => {core: {name: :core, label: "Core"}, general: {name: :general, label: "一般"}}
+
+Setting.category_name(:core) # => Core
+
+Setting.category(:core)
+# => [<Setting key: copy_right>, <Setting key: retry_limit>, <Setting key: consumption_tax_rate>]
+
+Setting.category(:general)
+# => [<Setting key: start_at>, <Setting key: start_on>, <Setting key: start>]
+
+Setting.category_name(:core) # => Core
+Setting.category_name(:general) # => 一般
+
+Setting.find_by(key: "copy_right").category #=> core
+Setting.find_by(key: "copy_right").category_label #=> Core
+
+Setting.find_by(key: "start_at").category #=> general
+Setting.find_by(key: "start_at").category_label #=> 一般
 ```
 
 ## Installation

@@ -10,6 +10,7 @@ module Ans
       config.default_store_name = :data
       config.default_key_column = :key
       config.default_value_column = :value
+      config.categories_method_name = :categories
       config.category_method_name = :category
       config.category_label_method_name = :category_label
       config.category_scope_name = :category
@@ -125,6 +126,9 @@ module Ans
                 raise KeyError, "category not found [#{name}]" unless category_info.has_key?(name.to_sym)
               end
               category_info[name.try(:to_sym)].try(:fetch,:label).to_s
+            end
+            define_method config.categories_method_name do
+              category_info
             end
 
             delegate(:eval_if_changed, to: store_name)

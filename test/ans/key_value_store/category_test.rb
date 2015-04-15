@@ -23,6 +23,15 @@ module Ans
     end
 
     class CategoryTest < Minitest::Test
+      describe ".categories" do
+        it "core" do
+          categories = {
+            core: {name: :core, label: "Core"},
+            general: {name: :general, label: "一般"},
+          }
+          assert{TestSetting.categories == categories}
+        end
+      end
       describe ".category" do
         before do
           TestSetting.data.reload
