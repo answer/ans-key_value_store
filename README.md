@@ -32,6 +32,18 @@ Setting.start_at             # => 2015-01-01 10:00:00 <Time>
 Setting.start_on             # => 2015-01-01          <Date>
 Setting.start                # => {now} 10:00:00      <Time>
 
+Setting.category(:core)
+# => [<Setting key: copy_right>, <Setting key: retry_limit>, <Setting key: consumption_tax_rate>]
+
+Setting.category(:general)
+# => [<Setting key: start_at>, <Setting key: start_on>, <Setting key: start>]
+
+Setting.find_by(key: "copy_right").category #=> core
+Setting.find_by(key: "copy_right").category_label #=> Core
+
+Setting.find_by(key: "start_at").category #=> general
+Setting.find_by(key: "start_at").category_label #=> 一般
+
 Setting.eval_if_changed do
   # 変更があった場合に再評価される
   config.copy_right = Setting.copy_right
@@ -60,7 +72,7 @@ Setting.data.save
 Setting.copy_right #=> "copy_right"
 
 # キーで find_by したものを取得
-Setting.data.copy_right_record #=> Setting.find_or_initialize_by(key: "copy_right")
+Setting.data.copy_right_record #=> Setting.find_by(key: "copy_right")
 ```
 
 ## Installation
@@ -86,15 +98,17 @@ class Setting < ActiveRecord::Base
   include Ans::KeyValueStore
   key_value_store do
     schema do |t|
-      t.string   :copy_right
-      t.integer  :retry_limit,          default: 3
-      t.decimal  :consumption_tax_rate
-      t.datetime :start_at
-      t.date     :start_on
-      t.time     :start
+      category :core do
+        t.string   :copy_right,                       validates: {presence: true}
+        t.integer  :retry_limit,          default: 3
+        t.decimal  :consumption_tax_rate
+      end
+      category :general, label: "一般" do
+        t.datetime :start_at
+        t.date     :start_on
+        t.time     :start
+      end
     end
-
-    validates :copy_right, presence: true
   end
 end
 ```
@@ -103,15 +117,25 @@ end
 
 データストア用のサブクラスを定義する
 
-ブロックの中はデータストア用の ActiveModel::Model で、 validates でバリデーションの定義が可能
-
 
 ### schema
 
 サブクラスには schema クラスメソッドが定義されており、これを使用してキーと型の定義を行う  
 マイグレーションで使用可能なメソッドは使えるが、上記以外のテストはしていない
 
-オプションは default のみ使用可能
+オプションは default, validates のみ使用可能
+
+validates を使用した場合、その項目に対してバリデーションが定義される
+
+key_value_store ブロックの中はデータストア用の ActiveModel::Model なので、その後でも validate 関連のメソッドでバリデーションの定義は可能
+
+### category
+
+各キーにカテゴリを指定
+
+カテゴリは `Setting.category(name)` スコープでそのカテゴリのキーのリレーションを取得したり、 `setting.category`, `setting.category_label` メソッドでカテゴリ名を取得したりするのに使用する
+
+設定項目に操作権限を付けることを想定(core なら admin 権限のみ、とか)
 
 
 ### データが読み込まれるタイミング
@@ -158,7 +182,8 @@ String の場合は空の文字列で設定すると空の文字列で保存さ�
 
 ## バリデーション
 
-key_value_store ブロックの中で validates が定義可能
+schema 定義の中で validates にハッシュを渡すことで定義可能  
+また、 key_value_store ブロックの中で任意のバリデーションが定義可能
 
 データ保存時にバリデーションエラーが検出された場合は更新がキャンセルされる
 
@@ -191,6 +216,9 @@ Ans::KeyValueStore.configure do |config|
   config.default_store_name = :data
   config.default_key_column = :key
   config.default_value_column = :value
+  config.category_method_name = :category
+  config.category_label_method_name = :category_label
+  config.category_scope_name = :category
 end
 ```
 

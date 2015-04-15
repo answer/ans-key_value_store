@@ -2,7 +2,7 @@ require "ans/key_value_store/test_helper"
 
 module Ans
   module KeyValueStore
-    class Setting < ActiveRecord::Base
+    class TestSetting < ActiveRecord::Base
       include Ans::KeyValueStore
 
       key_value_store do
@@ -13,33 +13,35 @@ module Ans
       end
     end
 
-    describe "eval_if_changed" do
-      it "変更時に再評価される" do
-        count = 0
-        Setting.eval_if_changed do
-          count += 1
-          Setting.copy_right
+    class EvalIfChangedTest < Minitest::Test
+      describe "eval_if_changed" do
+        it "変更時に再評価される" do
+          count = 0
+          TestSetting.eval_if_changed do
+            count += 1
+            TestSetting.copy_right
+          end
+
+          assert{count == 1}
+
+          TestSetting.data.update(copy_right: "answer")
+
+          assert{count == 2}
         end
 
-        assert{count == 1}
+        it "他の値の変更時には再評価されない" do
+          count = 0
+          TestSetting.eval_if_changed do
+            count += 1
+            TestSetting.copy_right
+          end
 
-        Setting.data.update(copy_right: "answer")
+          assert{count == 1}
 
-        assert{count == 2}
-      end
+          TestSetting.data.update(other_value: "value")
 
-      it "他の値の変更時には再評価されない" do
-        count = 0
-        Setting.eval_if_changed do
-          count += 1
-          Setting.copy_right
+          assert{count == 1}
         end
-
-        assert{count == 1}
-
-        Setting.data.update(other_value: "value")
-
-        assert{count == 1}
       end
     end
   end
