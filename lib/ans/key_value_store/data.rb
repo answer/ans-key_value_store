@@ -68,7 +68,10 @@ module Ans
         result = block.call
 
         unless @accessed_keys.blank?
-          observing_blocks << [block, @accessed_keys]
+          info = [block, @accessed_keys]
+          observing_blocks << info unless observing_blocks.any?{|b,keys|
+            b.source_location == block.source_location && keys == @accessed_keys
+          }
         end
         @accessed_keys = nil
 

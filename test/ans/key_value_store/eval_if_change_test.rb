@@ -46,7 +46,7 @@ module Ans
           assert{variable.variable == "answer"}
           assert{variable.count == 2}
           TestSetting.data.update(copy_right: "other")
-          assert{variable.count == 4}
+          assert{variable.count == 3} # 同じブロックは一回しか登録されない
           assert{variable.instance_variable_get(:@variable) == "other"}
         end
 
