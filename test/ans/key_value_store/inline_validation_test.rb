@@ -7,12 +7,9 @@ module Ans
 
       key_value_store do
         schema do |t|
-          t.string :copy_right
-          t.string :domain
+          t.string :copy_right, validates: {presence: true}
+          t.string :domain,     validates: {presence: true}
         end
-
-        validates :copy_right, presence: true
-        validates :domain, presence: true
       end
     end
 

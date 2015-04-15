@@ -2,7 +2,7 @@ require "ans/key_value_store/test_helper"
 
 module Ans
   module KeyValueStore
-    class Setting < ActiveRecord::Base
+    class TestSetting < ActiveRecord::Base
       include Ans::KeyValueStore
 
       key_value_store do
@@ -12,12 +12,14 @@ module Ans
       end
     end
 
-    describe "リロード" do
-      it "設定がリロードされ、変更点もクリアされる" do
-        Setting.data.copy_right = "answer"
-        Setting.data.reload
-        assert{Setting.copy_right.nil?}
-        assert{!Setting.data.changed?}
+    class ReloadTest < Minitest::Test
+      describe "リロード" do
+        it "設定がリロードされ、変更点もクリアされる" do
+          TestSetting.data.copy_right = "answer"
+          TestSetting.data.reload
+          assert{TestSetting.copy_right.nil?}
+          assert{!TestSetting.data.changed?}
+        end
       end
     end
   end
