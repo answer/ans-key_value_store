@@ -95,9 +95,10 @@ module Ans
             end
           end
 
-          eval_observing_blocks
+          changed_keys = changes.keys
           changes_applied
           @stored_data = @data.dup
+          eval_observing_blocks changed_keys
         end
 
         nil
@@ -143,8 +144,7 @@ module Ans
       def observing_blocks
         @observing_blocks ||= []
       end
-      def eval_observing_blocks
-        changed_keys = changes.keys
+      def eval_observing_blocks(changed_keys)
         observing_blocks.each do |block,accessed_keys|
           block.call if changed_keys.any?{|changed_key| accessed_keys.include?(changed_key.to_sym)}
         end
