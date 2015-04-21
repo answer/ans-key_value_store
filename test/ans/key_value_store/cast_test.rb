@@ -88,6 +88,7 @@ module Ans
       end
       describe "空文字列での設定とキャスト、永続化からの復元" do
         before do
+          ActiveRecord::Base.default_timezone = :utc
           TestSetting.data.instance_variable_set :@data, nil
         end
         it "copy_right" do
