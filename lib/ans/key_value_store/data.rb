@@ -131,7 +131,7 @@ module Ans
         @stored_data
       end
       def read_from_database(row)
-        attribute_write row.__send__(@key_column), row.__send__(@value_column)
+        attribute_write row.__send__(@key_column), row.__send__(@value_column) if row
       end
       def write_to_database(key,value)
         row = attribute_record(key)
@@ -139,6 +139,7 @@ module Ans
         row.__send__ "#{@value_column}=", value
         row.save! if row.changed?
         row
+      rescue ActiveRecord::StatementInvalid
       end
 
       def receive_access(key)
