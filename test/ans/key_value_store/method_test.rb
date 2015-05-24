@@ -19,55 +19,55 @@ module Ans
 
     class MethodTest < Minitest::Test
       describe "クラスメソッド" do
-        it "data" do
-          assert{TestSetting.respond_to?(:data)}
+        it "build_data" do
+          assert{TestSetting.respond_to?(:build_data)}
         end
       end
 
       describe "インスタンスメソッド" do
         it "persisted?" do
-          assert{TestSetting.data.persisted? == true}
+          assert{TestSetting.build_data.persisted? == true}
         end
         it "new_record?" do
-          assert{TestSetting.data.new_record? == false}
+          assert{TestSetting.build_data.new_record? == false}
         end
 
         it "copy_right" do
-          assert{TestSetting.data.respond_to?(:copy_right)}
+          assert{TestSetting.build_data.respond_to?(:copy_right)}
         end
         it "retry_limit" do
-          assert{TestSetting.data.respond_to?(:retry_limit)}
+          assert{TestSetting.build_data.respond_to?(:retry_limit)}
         end
         it "consumption_tax_rate" do
-          assert{TestSetting.data.respond_to?(:consumption_tax_rate)}
+          assert{TestSetting.build_data.respond_to?(:consumption_tax_rate)}
         end
         it "start_at" do
-          assert{TestSetting.data.respond_to?(:start_at)}
+          assert{TestSetting.build_data.respond_to?(:start_at)}
         end
         it "start_on" do
-          assert{TestSetting.data.respond_to?(:start_on)}
+          assert{TestSetting.build_data.respond_to?(:start_on)}
         end
         it "start" do
-          assert{TestSetting.data.respond_to?(:start)}
+          assert{TestSetting.build_data.respond_to?(:start)}
         end
 
         it "copy_right=" do
-          assert{TestSetting.data.respond_to?(:copy_right=)}
+          assert{TestSetting.build_data.respond_to?(:copy_right=)}
         end
         it "retry_limit=" do
-          assert{TestSetting.data.respond_to?(:retry_limit=)}
+          assert{TestSetting.build_data.respond_to?(:retry_limit=)}
         end
         it "consumption_tax_rate=" do
-          assert{TestSetting.data.respond_to?(:consumption_tax_rate=)}
+          assert{TestSetting.build_data.respond_to?(:consumption_tax_rate=)}
         end
         it "start_at=" do
-          assert{TestSetting.data.respond_to?(:start_at=)}
+          assert{TestSetting.build_data.respond_to?(:start_at=)}
         end
         it "start_on=" do
-          assert{TestSetting.data.respond_to?(:start_on=)}
+          assert{TestSetting.build_data.respond_to?(:start_on=)}
         end
         it "start=" do
-          assert{TestSetting.data.respond_to?(:start=)}
+          assert{TestSetting.build_data.respond_to?(:start=)}
         end
       end
     end

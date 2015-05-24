@@ -20,7 +20,7 @@ module Ans
           TestSetting.find_by!(key: "copy_right").update!(value: "answer")
         end
         it "全体のバリデーションチェックが行われる" do
-          data = TestSetting.data
+          data = TestSetting.build_data
           assert{data.invalid?}
         end
         it "バリデーションチェックが行われる" do

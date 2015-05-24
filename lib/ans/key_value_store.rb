@@ -125,7 +125,7 @@ module Ans
           define_method :has_valid_key_value_store_value do
             key = __send__(key_column).to_sym
             value = __send__(value_column)
-            data = self.class.__send__(store_name)
+            data = self.class.__send__(:"build_#{store_name}")
 
             data.__send__("#{key}=",value)
             data.valid?
@@ -147,7 +147,7 @@ module Ans
         end
 
         (class << self; self; end).class_eval do
-          define_method store_name do
+          define_method :"build_#{store_name}" do
             data_class.build_from_data
           end
           define_method config.category_label_method_name do |name|
