@@ -82,15 +82,15 @@ module Ans
 
             schema.columns.each do |column|
               unless data.key? column.name.to_sym
-                row = model.new(
-                  key_column => column.name,
-                  value_column => column.default,
-                )
                 begin
+                  row = model.new(
+                    key_column => column.name,
+                    value_column => column.default,
+                  )
                   row.save validate: false
                 rescue ActiveRecord::StatementInvalid
                 end
-                set row.__send__(key_column), row.__send__(value_column)
+                set column.name, column.default
               end
             end
           end
