@@ -25,6 +25,7 @@ end
 こういうアクセスができたらいいかも知れない
 
 ```ruby
+# 値の読み出し
 Setting.copy_right           # => answer              <String>
 Setting.retry_limit          # => 3                   <Fixnum>
 Setting.consumption_tax_rate # => 0.8                 <BigDecimal>
@@ -36,32 +37,32 @@ Setting.eval_if_changed do
   # 変更があった場合に再評価される
   config.copy_right = Setting.copy_right
 end
+
+Setting.data.reload # DB から値を読み込み
 ```
 ```erb
-<%# フォームの組み立て: update アクションへのルーティング %>
+<%# フォームの組み立て: model のように組み立てるとわかりやすいかもしれない %>
 <%= form_for Setting.data do |f| %>
   <%= f.label :copy_right %>
   <%= f.text_field :copy_right %>
 <% end %>
 ```
 ```ruby
-# コントローラーでアップデートができる
-Setting.data.update params.require(:setting_data).permit(:copy_right)
-
-# バリデーションの定義も可能
-# ただし、データ保存時には変更されていないカラムのバリデーションエラーはそのまま放っておいて更新は行われる
-Setting.data.update! copy_right: nil # => raise ActiveRecord::RecordInvalid
-
-# クラスメソッドで参照しているデータは保存が完了したもの
-Setting.copy_right #=> "answer"
-Setting.data.copy_right = "copy_right"
-Setting.copy_right #=> "answer"
-Setting.data.save
-Setting.copy_right #=> "copy_right"
-
-# キーで find_by したものを取得
-Setting.data.copy_right_record #=> Setting.find_by(key: "copy_right")
+# 更新時に読み出される値のアップデート
+# アップデートは Setting モデルから行う
+def update
+  @setting = Setting.find_by(key: :copy_right)
+  @setting.update(params.require(:setting).permit(:value))
+end
 ```
+
+```ruby
+# バリデーション
+@setting = Setting.find_by(key: :copy_right)
+@setting.update(value: nil)
+@setting.valid? # => false
+```
+
 ```ruby
 # カテゴリ
 Setting.categories # => {core: {name: :core, label: "Core"}, general: {name: :general, label: "一般"}}
@@ -149,23 +150,26 @@ key_value_store ブロックの中はデータストア用の ActiveModel::Model
 
 ### データが読み込まれるタイミング
 
-設定値を取得、更新しようとしたタイミングで、すべてのデータが読み込まれる
-
+設定値を取得しようとしたタイミングで、すべてのデータが読み込まれる  
 `all` スコープが使用され、一回クエリが発行される
 
+データの更新が完了した時点で、そのデータが読み込まれる
+
+initializer 等、アプリケーションの初期化時点で読み出しを行うのが良いかもしれない
 
 ### データが保存されるタイミング
+
+#### 値の一意性
+
+key は一意であるべきなので、データベースレベルで unique インデックスを作っておく必要がある
+
+アプリケーションレベルで一意にする努力はしていない
 
 #### 値を取得した時点
 
 データが読み込まれたタイミングで、 schema で指定したキーがデータベースに存在しない場合、書き込みを行う
 
 書き込み時には default で指定した値を使用する
-
-#### 保存された時点
-
-update, update!, save, save! がコールされた時点で変更されたキーを検索して値を更新  
-各変更済みキーに対して、検索して更新、の二回づつ検索クエリが発行される
 
 
 ## キャスト
@@ -194,11 +198,8 @@ String の場合は空の文字列で設定すると空の文字列で保存さ�
 schema 定義の中で validates にハッシュを渡すことで定義可能  
 また、 key_value_store ブロックの中で任意のバリデーションが定義可能
 
-データ保存時にバリデーションエラーが検出された場合は更新がキャンセルされる
-
-ただし、変更のないカラムにバリデーションエラーがあった場合、変更点の保存は行われる  
-これは、想定している key-value のデータがそれぞれ独立していることを想定しているため、他の key のバリデーションエラーにつられてすべてのデータが更新不可能になるのが不便であったためである
-
+指定したバリデーションは対象のモデルに還元され、バリデーションエラー時には
+base にバリデーションエラーメッセージが追加される
 
 ## Setting and defaults
 
@@ -215,7 +216,7 @@ class Setting < ActiveRecord::Base
 end
 ```
 
-* 第一引数 : データストア用のクラスインスタンスにアクセスするためのクラスメソッド名
+* 第一引数 : データストア名
 * key : キーカラム名
 * column : 値カラム名
 
@@ -231,9 +232,12 @@ Ans::KeyValueStore.configure do |config|
 end
 ```
 
-* `default_store_name` : デフォルトのクラスメソッド名
+* `default_store_name` : デフォルトのデータストア名
 * `default_key_column` : デフォルトのキーとして使用するカラム名
 * `default_value_column` : デフォルトの値として使用するカラム名
+* `category_method_name` : カテゴリを取得するメソッドの名前
+* `category_label_method_name` : カテゴリラベルを取得するメソッドの名前
+* `category_scope_name` : カテゴリでフィルタするスコープの名前
 
 ## 想定していること
 

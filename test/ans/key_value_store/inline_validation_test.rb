@@ -13,20 +13,20 @@ module Ans
       end
     end
 
-    class ValidationTest < Minitest::Test
-      describe "validation" do
+    class InlineValidationTest < Minitest::Test
+      describe "inline validation" do
         before do
-          TestSetting.create(key: "copy_right", value: "answer")
-          TestSetting.create(key: "domain", value: "") # 変更がなければバリデーションエラーを報告しない
-          TestSetting.data.reload
+          TestSetting::Data.reload
+          TestSetting.find_by!(key: "copy_right").update!(value: "answer")
+        end
+        it "全体のバリデーションチェックが行われる" do
+          data = TestSetting.data
+          assert{data.invalid?}
         end
         it "バリデーションチェックが行われる" do
-          TestSetting.data.copy_right = ""
-          assert{TestSetting.data.save === false}
-          assert{TestSetting.data.invalid?}
-          assert{TestSetting.copy_right == "answer"}
-          TestSetting.data.reload
-          assert{TestSetting.copy_right == "answer"}
+          setting = TestSetting.find_by!(key: "copy_right")
+          setting.value = ""
+          assert{setting.invalid?}
         end
       end
     end

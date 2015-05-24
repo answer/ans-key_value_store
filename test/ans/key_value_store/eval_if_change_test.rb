@@ -38,15 +38,16 @@ module Ans
     class EvalIfChangedTest < Minitest::Test
       describe "eval_if_changed" do
         before do
-          TestSetting.data.update(copy_right: "answer")
+          TestSetting::Data.reload
+          TestSetting.find_by!(key: "copy_right").update!(value: "answer")
         end
         it "変更時に再評価される" do
           variable = Variable.new
           assert{variable.variable == "answer"}
           assert{variable.variable == "answer"}
           assert{variable.count == 2}
-          TestSetting.data.update(copy_right: "other")
-          assert{variable.count == 3} # 同じブロックは一回しか登録されない
+          TestSetting.find_by!(key: "copy_right").update!(value: "other")
+          assert{variable.count == 4}
           assert{variable.instance_variable_get(:@variable) == "other"}
         end
 
@@ -54,7 +55,7 @@ module Ans
           variable = Variable.new
           assert{variable.variable == "answer"}
           assert{variable.count == 1}
-          TestSetting.data.update(other_value: "value")
+          TestSetting.find_by!(key: "other_value").update!(value: "value")
           assert{variable.count == 1}
           assert{variable.instance_variable_get(:@variable) == "answer"}
         end
@@ -64,7 +65,7 @@ module Ans
           assert{variable.cached_variable == "answer"}
           assert{variable.cached_variable == "answer"}
           assert{variable.count == 1}
-          TestSetting.data.update(copy_right: "other")
+          TestSetting.find_by!(key: "copy_right").update!(value: "other")
           assert{variable.count == 2}
           assert{variable.instance_variable_get(:@cached_variable) == "other"}
         end

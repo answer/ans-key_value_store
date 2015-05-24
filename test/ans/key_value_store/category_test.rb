@@ -34,7 +34,7 @@ module Ans
       end
       describe ".category" do
         before do
-          TestSetting.data.reload
+          TestSetting::Data.reload
         end
         it "core" do
           assert{TestSetting.category(:core).pluck(:key) == ["copy_right","retry_limit","consumption_tax_rate"]}
@@ -60,7 +60,7 @@ module Ans
 
       describe "#category" do
         before do
-          TestSetting.data.reload
+          TestSetting::Data.reload
         end
         it "core" do
           assert{TestSetting.find_by(key: "copy_right").category == :core}

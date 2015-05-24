@@ -69,25 +69,6 @@ module Ans
         it "start=" do
           assert{TestSetting.data.respond_to?(:start=)}
         end
-
-        it "copy_right_record" do
-          assert{TestSetting.data.respond_to?(:copy_right_record)}
-        end
-        it "retry_limit_record" do
-          assert{TestSetting.data.respond_to?(:retry_limit_record)}
-        end
-        it "consumption_tax_rate_record" do
-          assert{TestSetting.data.respond_to?(:consumption_tax_rate_record)}
-        end
-        it "start_at_record" do
-          assert{TestSetting.data.respond_to?(:start_at_record)}
-        end
-        it "start_on_record" do
-          assert{TestSetting.data.respond_to?(:start_on_record)}
-        end
-        it "start_record" do
-          assert{TestSetting.data.respond_to?(:start_record)}
-        end
       end
     end
   end
