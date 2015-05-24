@@ -14,11 +14,9 @@ module Ans
 
     class ReloadTest < Minitest::Test
       describe "リロード" do
-        it "設定がリロードされ、変更点もクリアされる" do
-          TestSetting.data.copy_right = "answer"
-          TestSetting.data.reload
+        it "設定がリロードされる" do
+          TestSetting::Data.reload
           assert{TestSetting.copy_right.nil?}
-          assert{!TestSetting.data.changed?}
         end
       end
     end

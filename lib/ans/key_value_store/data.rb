@@ -2,13 +2,78 @@ module Ans
   module KeyValueStore
     class Data
       include ActiveModel::Model
-      include ActiveModel::Dirty
 
-      def initialize(schema:, model:, key_column:, value_column:)
-        @schema = schema
-        @model = model
-        @key_column = key_column
-        @value_column = value_column
+      class << self
+        def schema=(schema)
+          @schema = schema
+        end
+
+        def build_from_data
+          new data
+        end
+
+        def get(key)
+          key = key.to_sym
+          @accessed_keys.try(:push, key)
+          data[key]
+        end
+        def set(key,value)
+          key = key.to_sym
+          data[key] = type(key).type_cast_from_user(value)
+          eval_observing_blocks key
+        end
+        def eval_if_changed(&block)
+          @accessed_keys = []
+
+          result = block.call
+
+          unless @accessed_keys.blank?
+            info = [block, @accessed_keys]
+            observing_blocks << info
+          end
+          @accessed_keys = nil
+
+          result
+        end
+
+        private
+          def data
+            @data ||= {}
+          end
+          def clear_data
+            @data = {}
+          end
+
+          def observing_blocks
+            @observing_blocks ||= []
+          end
+          def eval_observing_blocks(changed_key)
+            observing_blocks.each do |block,accessed_keys|
+              block.call if accessed_keys.include?(changed_key)
+            end
+          end
+
+          def type(key)
+            @types ||= {}
+            @types[key] ||= begin
+              column = @schema.columns.find{|column| column.name.to_sym == key}
+
+              column_type = column.try(:type) || :string
+              case column_type
+              when :bigint
+                type_name = "BigInteger"
+              when :datetime
+                type_name = "DateTime"
+              else
+                type_name = column_type.to_s.camelize
+              end
+              "ActiveRecord::Type::#{type_name}".constantize.new(
+                precision: column.try(:precision),
+                limit: column.try(:limit),
+                scale: column.try(:scale),
+              )
+            end
+        end
       end
 
       def new_record?
@@ -17,172 +82,6 @@ module Ans
       def persisted?
         true
       end
-
-      def attribute_read(key)
-        receive_access(key)
-        initialize_data[key.to_sym]
-      end
-      def attribute_read_stored(key)
-        receive_access(key)
-        initialize_stored_data[key.to_sym]
-      end
-      def attribute_write(key,value)
-        return unless respond_to?(key.to_sym)
-
-        data = initialize_data
-        value = cast key, value
-        if value != data[key.to_sym]
-          attribute_will_change! key
-        end
-
-        data[key.to_sym] = value
-      end
-      def attribute_record(key)
-        @model.find_or_initialize_by(@key_column => key)
-      end
-
-      def reload
-        @data = {}
-        begin
-          @model.all.each do |row|
-            read_from_database row
-          end
-        rescue ActiveRecord::StatementInvalid
-        end
-
-        @schema.columns.each do |column|
-          unless @data.key? column.name.to_sym
-            read_from_database write_to_database column.name, column.default
-          end
-        end
-
-        clear_changes_information
-        @stored_data = @data.dup
-
-        self
-      end
-
-      def eval_if_changed(&block)
-        @accessed_keys = []
-
-        result = block.call
-
-        unless @accessed_keys.blank?
-          info = [block, @accessed_keys]
-          observing_blocks << info unless observing_blocks.any?{|b,keys|
-            b.source_location == block.source_location
-          }
-        end
-        @accessed_keys = nil
-
-        result
-      end
-
-      def update!(data)
-        data.each do |key,value|
-          attribute_write key, value
-        end
-
-        if changed?
-          if invalid?
-            changes.each do |key,(old,new)|
-              if errors.key? key.to_sym
-                raise ActiveRecord::RecordInvalid, self
-              end
-            end
-          end
-
-          @model.transaction do
-            changes.each do |key,(old,new)|
-              write_to_database key, new
-            end
-          end
-
-          changed_keys = changes.keys
-          changes_applied
-          @stored_data = @data.dup
-          eval_observing_blocks changed_keys
-        end
-
-        nil
-      end
-      def update(data)
-        update!(data)
-        true
-      rescue ActiveRecord::RecordInvalid
-        false
-      end
-
-      def save!
-        update!({})
-      end
-      def save
-        update({})
-      end
-
-      private
-
-      def initialize_data
-        reload unless @data
-        @data
-      end
-      def initialize_stored_data
-        reload unless @stored_data
-        @stored_data
-      end
-      def read_from_database(row)
-        attribute_write row.__send__(@key_column), row.__send__(@value_column) if row
-      end
-      def write_to_database(key,value)
-        row = attribute_record(key)
-        value = value.to_s unless value.nil?
-        row.__send__ "#{@value_column}=", value
-        row.save! if row.changed?
-        row
-      rescue ActiveRecord::StatementInvalid
-      end
-
-      def receive_access(key)
-        @accessed_keys.try(:push, key.to_sym)
-      end
-      def observing_blocks
-        @observing_blocks ||= []
-      end
-      def eval_observing_blocks(changed_keys)
-        observing_blocks.each do |block,accessed_keys|
-          block.call if changed_keys.any?{|changed_key| accessed_keys.include?(changed_key.to_sym)}
-        end
-      end
-
-      def cast(key,value)
-        unless respond_to?(key)
-          value
-        else
-          type(key.to_sym).type_cast_from_user(value)
-        end
-      end
-      def type(key)
-        @types ||= {}
-        @types[key] ||= begin
-          column = @schema.columns.find{|column| column.name.to_sym == key}
-
-          column_type = column.try(:type) || :string
-          case column_type
-          when :bigint
-            type_name = "BigInteger"
-          when :datetime
-            type_name = "DateTime"
-          else
-            type_name = column_type.to_s.camelize
-          end
-          "ActiveRecord::Type::#{type_name}".constantize.new(
-            precision: column.precision,
-            limit: column.limit,
-            scale: column.scale,
-          )
-        end
-      end
-
     end
   end
 end

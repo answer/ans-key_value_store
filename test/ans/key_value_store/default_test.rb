@@ -22,7 +22,7 @@ module Ans
     class DefaultTest < Minitest::Test
       describe "デフォルトの永続化" do
         before do
-          TestSetting.data.reload
+          TestSetting::Data.reload
         end
         it "copy_right" do
           assert{TestSetting.find_by(key: "copy_right").value == "answer"}

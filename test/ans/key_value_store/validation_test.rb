@@ -19,17 +19,13 @@ module Ans
     class ValidationTest < Minitest::Test
       describe "validation" do
         before do
-          TestSetting.create(key: "copy_right", value: "answer")
-          TestSetting.create(key: "domain", value: "") # 変更がなければバリデーションエラーを報告しない
-          TestSetting.data.reload
+          TestSetting::Data.reload
+          TestSetting.find_by!(key: "copy_right").update!(value: "answer")
         end
         it "バリデーションチェックが行われる" do
-          TestSetting.data.copy_right = ""
-          assert{TestSetting.data.save === false}
-          assert{TestSetting.data.invalid?}
-          assert{TestSetting.copy_right == "answer"}
-          TestSetting.data.reload
-          assert{TestSetting.copy_right == "answer"}
+          data = TestSetting.data
+          assert{data.invalid?}
+          assert{data.errors.has_key?(:domain)}
         end
       end
     end

@@ -1,3 +1,5 @@
+require File.expand_path("../../../../db/connection",__FILE__)
+
 require "ans/key_value_store"
 
 require "minitest/autorun"
