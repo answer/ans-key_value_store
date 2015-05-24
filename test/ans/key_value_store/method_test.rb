@@ -69,6 +69,10 @@ module Ans
         it "start=" do
           assert{TestSetting.build_data.respond_to?(:start=)}
         end
+
+        it "attributes" do
+          assert{TestSetting.build_data.respond_to?(:attributes)}
+        end
       end
     end
   end

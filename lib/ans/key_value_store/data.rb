@@ -4,9 +4,7 @@ module Ans
       include ActiveModel::Model
 
       class << self
-        def schema=(schema)
-          @schema = schema
-        end
+        attr_accessor :schema
 
         def build_from_data
           new data
@@ -81,6 +79,10 @@ module Ans
       end
       def persisted?
         true
+      end
+
+      def attributes
+        self.class.schema.columns.map{|column| [column.name,__send__(column.name)]}.to_h
       end
     end
   end

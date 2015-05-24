@@ -85,6 +85,15 @@ Setting.find_by(key: "start_at").category #=> general
 Setting.find_by(key: "start_at").category_label #=> 一般
 ```
 
+```ruby
+# 全体データの取得
+data = Setting.build_data
+data.copy_right # => "answer"
+data.valid?
+data.errors
+data.attributes # => {"copy_right" => "answer", ...}
+```
+
 ## Installation
 
 Add this line to your application's Gemfile:
