@@ -23,7 +23,7 @@ module Ans
           TestSetting.find_by!(key: "copy_right").update!(value: "answer")
         end
         it "バリデーションチェックが行われる" do
-          data = TestSetting.data
+          data = TestSetting.build_data
           assert{data.invalid?}
           assert{data.errors.has_key?(:domain)}
         end
