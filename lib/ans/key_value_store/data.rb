@@ -36,7 +36,10 @@ module Ans
 
         private
           def data
-            @data ||= {}
+            unless @data
+              reload
+            end
+            @data
           end
           def clear_data
             @data = {}
